@@ -87,4 +87,7 @@ def main(reactor, jid, secret):
 
 
 if __name__ == '__main__':
-    react(main, sys.argv[1:])
+    if(len(sys.argv) > 1):
+        react(main, sys.argv[1:])
+    else:
+        print "Usage: xmpp_client.py xmmpuser@chat.server.com password"
