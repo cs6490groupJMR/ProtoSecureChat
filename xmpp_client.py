@@ -56,12 +56,23 @@ class Client(object):
 
         self.finished.callback(None)
 
+    
+    def sendMessage(self, xs, to, data):
+        message = domish.Element((None, 'message'))
+        message['to'] = to
+        message['from'] = to
+        message['type'] = 'chat'
+        message.addElement('body', content=data)
+        xs.send(message)
+
 
     def authenticated(self, xs):
         print "Authenticated."
 
         presence = domish.Element((None, 'presence'))
         xs.send(presence)
+
+        self.sendMessage(xs, '-friendid@chat.facebook.com', 'This is a test message')
 
         self.reactor.callLater(5, xs.sendFooter)
 
