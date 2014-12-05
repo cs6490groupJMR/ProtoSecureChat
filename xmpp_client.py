@@ -102,10 +102,10 @@ if __name__ == '__main__':
         react(main, sys.argv[1:])
     else:
         username1 = raw_input("Please enter your 1st user name: ")
-		pass1 = raw_input("Please enter your password: ")
+	pass1 = raw_input("Please enter your password: ")
 
-		username2 = raw_input("Please enter your 2st user name: ")
-		pass2 = raw_input("Please enter your password: ")
+	username2 = raw_input("Please enter your 2st user name: ")
+	pass2 = raw_input("Please enter your password: ")
 		
-		react(main,[username1,pass1])
-		react(main,[username2,pass2])
+	react(main,[username1,pass1])
+	react(main,[username2,pass2])
