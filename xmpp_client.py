@@ -56,12 +56,23 @@ class Client(object):
 
         self.finished.callback(None)
 
+    
+    def sendMessage(self, xs, to, data):
+        message = domish.Element((None, 'message'))
+        message['to'] = to
+        message['from'] = to
+        message['type'] = 'chat'
+        message.addElement('body', content=data)
+        xs.send(message)
+
 
     def authenticated(self, xs):
         print "Authenticated."
 
         presence = domish.Element((None, 'presence'))
         xs.send(presence)
+
+        self.sendMessage(xs, '-friendid@chat.facebook.com', 'This is a test message')
 
         self.reactor.callLater(5, xs.sendFooter)
 
@@ -90,4 +101,11 @@ if __name__ == '__main__':
     if(len(sys.argv) > 1):
         react(main, sys.argv[1:])
     else:
-        print "Usage: xmpp_client.py xmmpuser@chat.server.com password"
+        username1 = raw_input("Please enter your 1st user name: ")
+	pass1 = raw_input("Please enter your password: ")
+
+	username2 = raw_input("Please enter your 2st user name: ")
+	pass2 = raw_input("Please enter your password: ")
+		
+	react(main,[username1,pass1])
+	react(main,[username2,pass2])
