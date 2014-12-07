@@ -10,6 +10,8 @@ Current Status
 ===============
 To send a facebook message:
 
-replace the friendid in the string '-friendid@chat.facebook.com' with the friend id of who will receive message
+python xmpp_client.py
 
-python xmpp_client.py fbusername@chat.facebook.com fbpassword
+You will be prompted for the xmpp user (eg username@chat.facebook.com) and password.
+This will be repeated for the second account you will use.
+The facebook friend id will be prompted.
