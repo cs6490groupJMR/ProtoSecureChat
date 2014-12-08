@@ -17,8 +17,7 @@ screen.clear()
 
 screen.set_color(15, 0)
 
-servers = [ {'name':"Facebook",'url':"@chat.facebook.com"},{'name':"Hangouts",'url':"@gmail.com"}]
-
+servers = [ {'name':"Facebook",'url':"@chat.facebook.com"},{'name':"Hangouts",'url':"@gmail.com"},{'name':"Dukgo",'url':"@dukgo.com"}]
 
 import sys
 
@@ -114,7 +113,7 @@ class Client(object):
         print myPKey
 
 
-        friendid = raw_input("Please enter your friends id for {0} :".format(self.jid))
+        friendid = raw_input("Please enter your friends username/friendid for {0} :".format(self.jid))
 
         self.sendMessage(friendid+"@"+self.jid.host, myPKey)
         #this makes program terminate!
