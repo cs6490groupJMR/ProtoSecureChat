@@ -139,8 +139,8 @@ def main(reactor, jid1, secret1, jid2, secret2):
     @param secret: A C{str}
     """
 
-    #services = [Client(reactor, JID(jid1), secret1).finished, Client(reactor, JID(jid2), secret2).finished]
-    services = [Client(reactor, JID(jid1), secret1).finished]
+    services = [Client(reactor, JID(jid1), secret1).finished, Client(reactor, JID(jid2), secret2).finished]
+    #services = [Client(reactor, JID(jid1), secret1).finished]
     
     d = defer.gatherResults(services)
     #d.addCallback(lambda ignored: reactor.stop())
@@ -162,11 +162,11 @@ if __name__ == '__main__':
     pass1 = raw_input("Please enter your password: ")
 
     print "\n\n"
-    #choice2 = raw_input("Please enter your 2st service: ")
-    #username2 = raw_input("Please enter your user name: ")
-    #pass2 = raw_input("Please enter your password: ")
+    choice2 = raw_input("Please enter your 2st service: ")
+    username2 = raw_input("Please enter your user name: ")
+    pass2 = raw_input("Please enter your password: ")
 
-    #react(main,[username1+servers[int(choice1)]['url'],pass1,username2+servers[int(choice2)]['url'],pass2])
-    react(main,[username1+servers[int(choice1)]['url'],pass1,username1+servers[int(choice1)]['url'],pass1])
+    react(main,[username1+servers[int(choice1)]['url'],pass1,username2+servers[int(choice2)]['url'],pass2])
+    #react(main,[username1+servers[int(choice1)]['url'],pass1,username1+servers[int(choice1)]['url'],pass1])
         
     screen.set_color(15, 0)
