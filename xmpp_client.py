@@ -8,9 +8,21 @@ A very simple twisted xmpp-client (Jabber ID)
 To run the script:
 $ python xmpp_client.py <jid> <secret>
 """
+import math
+from colorconsole import terminal
+
+screen = terminal.get_terminal(conEmu=False)
+screen.set_title("ProtoSecureChat")
+screen.clear()
+
+screen.set_color(15, 0)
+
+servers = [ {'name':"Facebook",'url':"@chat.facebook.com"},{'name':"Hangouts",'url':"@gmail.com"}]
+
 
 import sys
 
+from twisted.internet import defer
 from twisted.internet.defer import Deferred
 from twisted.internet.task import react
 from twisted.names.srvconnect import SRVConnector
@@ -19,29 +31,41 @@ from twisted.words.protocols.jabber import xmlstream, client
 from twisted.words.protocols.jabber.jid import JID
 import common
 
+cColor = 1
+
 class Client(object):
     def __init__(self, reactor, jid, secret):
+        global cColor
+        self.jid=jid
+        self.textColor = cColor
+        cColor +=1
         self.reactor = reactor
         f = client.XMPPClientFactory(jid, secret)
         f.addBootstrap(xmlstream.STREAM_CONNECTED_EVENT, self.connected)
         f.addBootstrap(xmlstream.STREAM_END_EVENT, self.disconnected)
         f.addBootstrap(xmlstream.STREAM_AUTHD_EVENT, self.authenticated)
         f.addBootstrap(xmlstream.INIT_FAILED_EVENT, self.init_failed)
-        connector = SRVConnector(
-            reactor, 'xmpp-client', jid.host, f, defaultPort=5222)
+        if (jid.host == "gmail.com"):
+            connector = SRVConnector(reactor, 'xmpp-client', "talk.google.com", f, defaultPort=5222)
+        else:
+            connector = SRVConnector(reactor, 'xmpp-client', jid.host, f, defaultPort=5222)
+
         connector.connect()
         self.finished = Deferred()
 
 
     def rawDataIn(self, buf):
+        screen.set_color(self.textColor, 0)
         print "RECV: %s" % unicode(buf, 'utf-8').encode('ascii', 'replace')
 
 
     def rawDataOut(self, buf):
+        screen.set_color(self.textColor, 0)
         print "SEND: %s" % unicode(buf, 'utf-8').encode('ascii', 'replace')
 
 
     def connected(self, xs):
+        screen.set_color(self.textColor, 0)
         print 'Connected.'
 
         self.xmlstream = xs
@@ -52,21 +76,24 @@ class Client(object):
 
 
     def disconnected(self, xs):
+        screen.set_color(self.textColor, 0)
         print 'Disconnected.'
 
         self.finished.callback(None)
 
     
     def sendMessage(self, xs, to, data):
+        screen.set_color(self.textColor, 0)
         message = domish.Element((None, 'message'))
         message['to'] = to
-        message['from'] = to
+        message['from'] = self.jid
         message['type'] = 'chat'
         message.addElement('body', content=data)
         xs.send(message)
 
 
     def authenticated(self, xs):
+        screen.set_color(self.textColor, 0)
         print "Authenticated."
 
         presence = domish.Element((None, 'presence'))
@@ -76,13 +103,15 @@ class Client(object):
         myPKey = common.getGHPublicKey(dh)
         print myPKey
 
-        friendid = raw_input("Please enter your friends id: ")
-        self.sendMessage(xs, friendid+'@chat.facebook.com', myPKey)
+
+        friendid = raw_input("Please enter your friends id for {0} :".format(self.jid))
+        self.sendMessage(xs, friendid+"@"+self.jid.host, myPKey)
 
         self.reactor.callLater(5, xs.sendFooter)
 
 
     def init_failed(self, failure):
+        screen.set_color(self.textColor, 0)
         print "Initialization failed."
         print failure
 
@@ -90,7 +119,7 @@ class Client(object):
 
 
 
-def main(reactor, jid, secret):
+def main(reactor, jid1, secret1, jid2, secret2):
     """
     Connect to the given Jabber ID and return a L{Deferred} which will be
     called back when the connection is over.
@@ -99,18 +128,32 @@ def main(reactor, jid, secret):
     @param jid: A L{JID} to connect to.
     @param secret: A C{str}
     """
-    return Client(reactor, JID(jid), secret).finished
+
+    services = [Client(reactor, JID(jid1), secret1).finished, Client(reactor, JID(jid2), secret2).finished]
+    
+    d = defer.gatherResults(services)
+    #d.addCallback(lambda ignored: reactor.stop())
+
+    return d
+    #return services[0].finished
 
 
 if __name__ == '__main__':
-    if(len(sys.argv) > 1):
-        react(main, sys.argv[1:])
-    else:
-        username1 = raw_input("Please enter your 1st user name: ")
-        pass1 = raw_input("Please enter your password: ")
+    i =0
+    print "Available services are : \n"
+    for server in servers:
+        print '{0} :{1}'.format(i,server['name'])
+        i+=1
 
-        username2 = raw_input("Please enter your 2st user name: ")
-        pass2 = raw_input("Please enter your password: ")
+    choice1 = raw_input("Please enter your 1st service: ")
+    username1 = raw_input("Please enter your user name: ")
+    pass1 = raw_input("Please enter your password: ")
 
-        react(main,[username1,pass1])
-        react(main,[username2,pass2])
+    print "\n\n"
+    choice2 = raw_input("Please enter your 2st service: ")
+    username2 = raw_input("Please enter your user name: ")
+    pass2 = raw_input("Please enter your password: ")
+
+    react(main,[username1+servers[int(choice1)]['url'],pass1,username2+servers[int(choice2)]['url'],pass2])
+        
+    screen.set_color(15, 0)
