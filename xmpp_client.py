@@ -11,14 +11,13 @@ $ python xmpp_client.py <jid> <secret>
 import math
 from colorconsole import terminal
 
-screen = terminal.get_terminal(conEmu=False)
+screen = terminal.get_terminal()
 screen.set_title("ProtoSecureChat")
 screen.clear()
 
 screen.set_color(15, 0)
 
-servers = [ {'name':"Facebook",'url':"@chat.facebook.com"},{'name':"Hangouts",'url':"@gmail.com"}]
-
+servers = [ {'name':"Facebook",'url':"@chat.facebook.com"},{'name':"Hangouts",'url':"@gmail.com"},{'name':"Dukgo",'url':"@dukgo.com"}]
 
 import sys
 
@@ -86,7 +85,7 @@ class Client(object):
         screen.set_color(self.textColor, 0)
         message = domish.Element((None, 'message'))
         message['to'] = to
-        message['from'] = self.jid
+        message['from'] = self.jid.full()
         message['type'] = 'chat'
         message.addElement('body', content=data)
         xs.send(message)
@@ -104,7 +103,7 @@ class Client(object):
         print myPKey
 
 
-        friendid = raw_input("Please enter your friends id for {0} :".format(self.jid))
+        friendid = raw_input("Please enter your friends username/friendid for {0} :".format(self.jid))
         self.sendMessage(xs, friendid+"@"+self.jid.host, myPKey)
 
         self.reactor.callLater(5, xs.sendFooter)
