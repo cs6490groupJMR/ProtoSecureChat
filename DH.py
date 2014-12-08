@@ -87,7 +87,6 @@ class DiffieHellman(object):
             self.p = p
             self.g = g
         else:
-            logging.debug('Using default prime and generator');
             self.p = def_p
             self.g = def_g
 

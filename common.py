@@ -44,7 +44,7 @@ def generateKey():
 
 # initialize a new DiffieHellman exchange.
 def initDH():
-    return DiffieHellman()
+    return DH.DiffieHellman()
 
 # Get the public key that is to be sent to the other client.
 def getGHPublicKey(dh):

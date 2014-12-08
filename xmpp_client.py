@@ -17,7 +17,7 @@ from twisted.names.srvconnect import SRVConnector
 from twisted.words.xish import domish
 from twisted.words.protocols.jabber import xmlstream, client
 from twisted.words.protocols.jabber.jid import JID
-
+import common
 
 class Client(object):
     def __init__(self, reactor, jid, secret):
@@ -72,8 +72,12 @@ class Client(object):
         presence = domish.Element((None, 'presence'))
         xs.send(presence)
 
+        dh = common.initDH()
+        myPKey = common.getGHPublicKey(dh)
+        print myPKey
+
         friendid = raw_input("Please enter your friends id: ")
-        self.sendMessage(xs, friendid+'@chat.facebook.com', 'This is a test message')
+        self.sendMessage(xs, friendid+'@chat.facebook.com', myPKey)
 
         self.reactor.callLater(5, xs.sendFooter)
 
