@@ -1,7 +1,10 @@
 \documentclass[twoside]{article}
 \usepackage{multicol,graphicx}
 \usepackage{amsmath,fouriernc,parskip,amssymb}
-\usepackage[top=.5in,bottom=.5in,left=.5in,right=.5in,columnsep=20pt]{geometry} 
+\usepackage[top=.5in,bottom=.5in,left=.5in,right=.5in,columnsep=20pt]{geometry}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{0em}
+
 \title{CS6490 Project Report: An Awesome Title}
 \author{Jeff Brock, Roozbeh Gholizadeh, Montgomery Carter}
 \date{}
@@ -28,36 +31,28 @@
 \section{Introduction}
 We rely on large tech organizations more and more to facilitate our daily communication.  As a result, these large tech organizations have access to our personal information, from the mundane to the deeply personal and revealing.  While operating off the grid may work for some individuals, the convenience of such services provide a compelling argument in favor of their use.  The typical attitude is to accept the loss of privacy in exchange for use of the service.
 
-There are many solutions to provide a layer of authentication and encryption that run on top of such services as GMail, Hotmail, Google Hangouts, Skype, etc.  However, these solutions are complicated, and generally rely on public-key based authentication to establish shared session keys for encrypting the ensuing communication.  Configuring such a solution is complex enough to dissuade the typical user from employing them.
+There are many solutions to provide a layer of authentication and encryption that run on top of such services as GMail, Hotmail, Google Hangouts, Skype, etc.  However, these solutions are complicated, and generally rely on public-key (RSA, PGP) based authentication to establish shared session keys for encrypting the ensuing communication.  Configuring such a solution is complex enough to dissuade the typical user from employing them, and 
 
-We present the WhizBang Protocol (WBP), a protocol for establishing shared session keys to be used for encryption and integrity protection of instant messaging (IM) communications.  However, unlike existing solutions, WBP does not, itself, rely on public key authentication.  Instead, WBP relies on the authentication performed by service providers such as Google, Microsoft, or Yahoo, to verify the identities of IM conversation participants.  Further, the protocol ensures that service providers do not have access to the shared session keys, and importantly, prevents service providers from employing a man in the middle (MitM) attack, and acting as an intermediary between the two communicating parties.
+We present the WhizBang Protocol (WBP), a protocol for establishing shared session keys to be used for encryption and integrity protection of instant messaging (IM) communications.  However, unlike existing solutions, WBP does not, itself, rely on public key authentication.  Instead, WBP relies on the authentication performed by service providers such as Google, Microsoft, or Yahoo, to verify the identities of IM conversation participants.  Further, the protocol ensures that service providers do not have access to the shared session keys, and importantly, prevents service providers from employing a man in the middle (MitM) attack, and acting as an interfering intermediary between the two communicating parties.
 
-Unsurprisingly, WBP utilizes a Diffie-Hellman (DH) key exchange for the establishment of shared session keys.  The more interesting feature of WBP is its use of two separate messenger services to perform the requisite DH exchange.  Each party participating in the IM conversation requires an account with two or more separate IM services.
+Unsurprisingly, WBP utilizes a Diffie-Hellman (DH) key exchange for the establishment of shared session keys.  The more interesting feature of WBP is its use of two separate messenger services to perform the requisite DH exchange.  By sending half of the DH exchange via one IM service, and the response via a separate IM service, no one service is privy to both sides of the exchange, rendering both services incapable of mounting an MitM attack.
 
-Each participating party signs on to the initiating <define this ``initiating service''> IM service, which authenticates the user with that service.  The DH exchange begins by the initiating party sending a message consisting of a DH public key, and a ``Next IM Service'' field.  All parties then sign on to the IM service indicated in the \emph{Next IM Service} field.  The recipient parties then generate and send their DH public keys to all participating parties.  All parties are now able to calculate the group's DH shared key.
-
-Having established a DH shared key, <I'm making this part up.  We need to come up with a real protocol for achieving a shared session secret> each party then sends a nonce, which are then used to generate a shared session key.
-
-Because the initiating party is not listening for a DH key exchange response on the initiating IM service, any MitM response from the server hosting the initiating IM service to the initiating party is disregarded.  This prevents this hosting server from performing a MitM.  Similarly, because no party is listening for a DH exchange response on the \emph{Next IM Service}, there is no opportunity for the server hosting this second service to perform a MitM attack.  Hereafter, we will refer to such an MitM attack by an IM service host which necessarily sits between the communicating parties to relay messages as an \emph{internal MitM attack}.
-
-Still, this leaves an opportunity for a more generic MitM attack, hereafter referred to as an \emph{external MitM attack}.  If an adversary has control of part of the route to one of the participants, a MitM attack is still feasible.  To address this concern of an external MitM attack, WBP employs two strategies for addressing this vulnerability.  The first, and preferred, strategy is to use an IM service that normally performs encryption between the participants and the IM service host for at least one direction of the DH exchange.  This ensures that any intruder on the route will not have access to the plaintext DH key in at least one direction, thus preventing a MitM attack.  The second strategy is to exchange a temporary ``long term'' key between parties, which is then used to encrypt the DH exchange of subsequent conversations between the same parties.  However, this second strategy assumes that an intruder was not present during the \emph{initial} conversation between the parties (otherwise an intruder would know the temporary long term key).  This temporary ``long term'' key is replaced after the DH key exchange of each conversation between the parties.  This requires an intruder to be  present for \emph{every} conversation between the parties, as missing a conversation means the temporary ``long term'' key they knew has been replaced without them being able to observe the replacement.
-
-
+Further, WBP includes two mechanisms to protect against MitM attacks performed by external parties (e.g., one chat participant's ISP network).  With the first mechanism, by requiring SSL encryption between chat client and chat host (which is available with many IM providers such as Facebook and Google) for at least one of the DH exchange messages, such an intruder will not have all of the information necessary to mount an MitM attack.  If no chat service offering SSL encryption is available, utilizing the second mechanism, each participant remembers a temporary ``long term'' secret (TLTS).  This temporary ``long term'' secret is used in lieu of a DH exchange to encrypt the exchange of the session keys for every conversation subsequent to the initial conversation between the two parties.  During each subsequent conversation between the parties, this TLTS is updated with a new TLTS.  Of course, this assumes that no intruder performs an MitM attack during the initial conversation.
 
 \section{Related Work}
 
 \section{Adversary Model}
 In our adversary model we assume two nefarious players.  The relationship between these players and the chat participants are only described for Alice, however, apply equally well to Bob.
 
-The first is Hank the host, the server hosting a chat service.  Hank is capable of mounting a MitM attack on a DH exchange conducted exclusively over a single chat service, because he necessarily must receive and relay all messages between Alice and Bob.  We refer to this type of MitM attack as an internal MitM attack.  Hank, however, doesn't have control of any node that sits on the route between Alice and multiple chat services (including Hank).  It is conceivable that Hank may have control of a few nodes in his periphery network, but not some node that allows Hank to modify messages between Alice and some other chat service.
+The first is Hank the host, the server hosting a chat service.  Hank is capable of mounting a MitM attack on a DH exchange conducted exclusively over a single chat service, because he necessarily must receive and relay all messages between Alice and Bob.  Even when encryption is used between client and host, Hank still has access to read and modify (or replace) the plaintext messages between participants.  We refer to this type of MitM attack as an internal MitM attack.  Hank, however, doesn't have control of any node that sits on the route between Alice and multiple chat services (including Hank).  It is conceivable that Hank may have control of a few nodes in his periphery network, but not some node that allows Hank to modify messages between Alice and some other chat service.
 
-Trudy has control of some node along the route that is both between Alice and every chat service (perhaps Alice ISP), and is capable of performing a MitM attack.  We refer to this more traditional type of MitM attack as an external MitM attack.
+Trudy has control of some node along the route that is between Alice and every chat service (perhaps Trudy is Alice's ISP), and is capable of performing a MitM attack.  We refer to this more traditional type of MitM attack as an external MitM attack.
 
 We assume that both Hank and Trudy know WBP, as well as the encryption and message digest algorithms used by WBP.
 
-In short, we consider the chat service providers as capable of modifying messages only as they relay them, and external intruders capable of modifying any message sent/received to one of the chat participants.  With that said, the consideration of external intruders was more of an afterthought --- the main objective of WBP is to prevent the service providers from reading conversations.
+In short, we consider the chat service providers to be capable of modifying messages only as they relay them, and external intruders capable of modifying any message sent/received to one of the chat participants.  With that said, the consideration of external intruders was more of an afterthought --- the main objective of WBP is to prevent the service providers from reading conversations.
 
-\section{Methodology}
+\section{Protocol Definition}
 In this section we first introduce some terminology and bookkeeping.  Let $S$ be a list of chat services.  Alice maintains a list of usernames for Bob, $U_{B}$, where each $U_{B_x}$ is Bob's username for $S_x$.  Bob maintains a similar list, $U_{A}$, for Alice.  Alice and Bob also keep track of a temporary ``long term'' secret, $TLTS_{AB}$.  Encryption and integrity protection algorithms between Alice and Bob can be any accepted, secure algorithm.  Let $f(a,b)$ be a secure function for generating a session key based on two input nonces.  Let $g(a,b)$ be a second secure function for generating a key, where $f(a,b) \neq g(a,b)$, and the output of $f(a,b)$ cannot be predicted from $g(a,b)$, and vice versa.
 
 <I don't like the following section.  Maybe a better way to trim it down to the essentials, or maybe represent as table...  I feel we should have a textual description of the protocol, in addition to the diagram, but this is ugly and unwieldy>
@@ -87,9 +82,34 @@ Alice and Bob now have a session key with which they can encrypt and perform int
 This protocol is summarized in the following diagram:
 \includegraphics{ProtocolDiagramBW.png}
 
+\section{Discussion}
+Each participating party signs on to the initiating <define this ``initiating service''> IM service, which authenticates the user with that service.  The DH exchange begins by the initiating party sending a message consisting of a DH public key, and a ``Next IM Service'' field.  All parties then sign on to the IM service indicated in the \emph{Next IM Service} field.  The recipient parties then generate and send their DH public keys to all participating parties.  All parties are now able to calculate the group's DH shared key.
+
+Having established a DH shared key, <I'm making this part up.  We need to come up with a real protocol for achieving a shared session secret> each party then sends a nonce, which are then used to generate a shared session key.
+
+Because the initiating party is not listening for a DH key exchange response on the initiating IM service, any MitM response from the server hosting the initiating IM service to the initiating party is disregarded.  This prevents this hosting server from performing a MitM.  Similarly, because no party is listening for a DH exchange response on the \emph{Next IM Service}, there is no opportunity for the server hosting this second service to perform a MitM attack.  Hereafter, we will refer to such an MitM attack by an IM service host which necessarily sits between the communicating parties to relay messages as an \emph{internal MitM attack}.
+
+Still, this leaves an opportunity for a more generic MitM attack, hereafter referred to as an \emph{external MitM attack}.  If an adversary has control of part of the route to one of the participants, a MitM attack is still feasible.  To address this concern of an external MitM attack, WBP employs two strategies for addressing this vulnerability.  The first, and preferred, strategy is to use an IM service that normally performs encryption between the participants and the IM service host for at least one direction of the DH exchange.  This ensures that any intruder on the route will not have access to the plaintext DH key in at least one direction, thus preventing a MitM attack.  The second strategy is to exchange a temporary ``long term'' key between parties, which is then used to encrypt the DH exchange of subsequent conversations between the same parties.  However, this second strategy assumes that an intruder was not present during the \emph{initial} conversation between the parties (otherwise an intruder would know the temporary long term key).  This temporary ``long term'' key is replaced after the DH key exchange of each conversation between the parties.  This requires an intruder to be  present for \emph{every} conversation between the parties, as missing a conversation means the temporary ``long term'' key they knew has been replaced without them being able to observe the replacement.
+
+By wrapping the initial DH message from Alice to Bob in SSL established between Alice and $S_0$, any attempt by Trudy to mount an MitM is thwarted, as SSL provides encryption and message authentication.  As a result, it is impossible for Trudy to learn $g$, $p$, or $g^a mod p$.  This means that even if she is capable of modifying messages between Alice and all other IM servics including $S_n$, the best she can do is make Alice and Bob disagree on $g^{ab} mod p$.  Note that this protection is also afforded when $S_0$ is not encrypted, but $S_n$ is.
+
+<Username syncing>
+
+<Alternate for always using $S_0$>
+
+
+
 \section{Implementation}
 
 \section{Conclusion}
+
+\section{Appendix A: Protocol Extensions}
+There are number of ways that WBP can be extended to add interesting functionality.  
+
+If we extend our adversary model to include collusion between multiple IM services, it is then possible for $S_0$ to do the first half of an internal MitM attack, and then provide the first half of the DH MitM exchange to $S_n$ alerting it that the second half of the DH exchange will be performed on their network.  $S_n$ now has sufficient information to complete a DH MitM attack.
+
+
+WBP can also be trivially extended to work with group chats, in addition to one-on-one chats.
 
 \section{References}
 
