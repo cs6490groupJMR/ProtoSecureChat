@@ -11,7 +11,7 @@ $ python xmpp_client.py <jid> <secret>
 import math
 from colorconsole import terminal
 
-screen = terminal.get_terminal(conEmu=False)
+screen = terminal.get_terminal()
 screen.set_title("ProtoSecureChat")
 screen.clear()
 
@@ -45,10 +45,10 @@ class Client(object):
         f.addBootstrap(xmlstream.STREAM_END_EVENT, self.disconnected)
         f.addBootstrap(xmlstream.STREAM_AUTHD_EVENT, self.authenticated)
         f.addBootstrap(xmlstream.INIT_FAILED_EVENT, self.init_failed)
-        if (jid.host == "gmail.com"):
-            connector = SRVConnector(reactor, 'xmpp-client', "talk.google.com", f, defaultPort=5222)
-        else:
-            connector = SRVConnector(reactor, 'xmpp-client', jid.host, f, defaultPort=5222)
+        #if (jid.host == "gmail.com"):
+        #    connector = SRVConnector(reactor, 'xmpp-client', "talk.google.com", f, defaultPort=5222)
+        #else:
+        connector = SRVConnector(reactor, 'xmpp-client', jid.host, f, defaultPort=5222)
 
         connector.connect()
         self.finished = Deferred()
@@ -74,6 +74,15 @@ class Client(object):
         xs.rawDataInFn = self.rawDataIn
         xs.rawDataOutFn = self.rawDataOut
 
+        self.xmlstream.addObserver('/message', self.handle_message)
+
+    def handle_message(self, message):
+        for element in message.elements():
+          if element.name == 'body':
+            body = unicode(element).strip()
+            print body
+            #self.send_message(message['from'], 'tetet')
+            break
 
     def disconnected(self, xs):
         screen.set_color(self.textColor, 0)
@@ -82,14 +91,15 @@ class Client(object):
         self.finished.callback(None)
 
     
-    def sendMessage(self, xs, to, data):
+    def sendMessage(self, to, data):
         screen.set_color(self.textColor, 0)
         message = domish.Element((None, 'message'))
         message['to'] = to
-        message['from'] = self.jid
+        #google doesnt like from tag, it should acompany id too! just ignoring it seems to work!
+        #message['from'] = self.jid.full()
         message['type'] = 'chat'
-        message.addElement('body', content=data)
-        xs.send(message)
+        message.addElement('body', content= data)
+        self.xmlstream.send(message)
 
 
     def authenticated(self, xs):
@@ -105,9 +115,10 @@ class Client(object):
 
 
         friendid = raw_input("Please enter your friends id for {0} :".format(self.jid))
-        self.sendMessage(xs, friendid+"@"+self.jid.host, myPKey)
 
-        self.reactor.callLater(5, xs.sendFooter)
+        self.sendMessage(friendid+"@"+self.jid.host, myPKey)
+        #this makes program terminate!
+        self.reactor.callLater(8, xs.sendFooter)
 
 
     def init_failed(self, failure):
@@ -129,7 +140,8 @@ def main(reactor, jid1, secret1, jid2, secret2):
     @param secret: A C{str}
     """
 
-    services = [Client(reactor, JID(jid1), secret1).finished, Client(reactor, JID(jid2), secret2).finished]
+    #services = [Client(reactor, JID(jid1), secret1).finished, Client(reactor, JID(jid2), secret2).finished]
+    services = [Client(reactor, JID(jid1), secret1).finished]
     
     d = defer.gatherResults(services)
     #d.addCallback(lambda ignored: reactor.stop())
@@ -144,16 +156,18 @@ if __name__ == '__main__':
     for server in servers:
         print '{0} :{1}'.format(i,server['name'])
         i+=1
-
+    
+    print "\n"
     choice1 = raw_input("Please enter your 1st service: ")
     username1 = raw_input("Please enter your user name: ")
     pass1 = raw_input("Please enter your password: ")
 
     print "\n\n"
-    choice2 = raw_input("Please enter your 2st service: ")
-    username2 = raw_input("Please enter your user name: ")
-    pass2 = raw_input("Please enter your password: ")
+    #choice2 = raw_input("Please enter your 2st service: ")
+    #username2 = raw_input("Please enter your user name: ")
+    #pass2 = raw_input("Please enter your password: ")
 
-    react(main,[username1+servers[int(choice1)]['url'],pass1,username2+servers[int(choice2)]['url'],pass2])
+    #react(main,[username1+servers[int(choice1)]['url'],pass1,username2+servers[int(choice2)]['url'],pass2])
+    react(main,[username1+servers[int(choice1)]['url'],pass1,username1+servers[int(choice1)]['url'],pass1])
         
     screen.set_color(15, 0)
