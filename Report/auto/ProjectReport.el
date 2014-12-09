@@ -21,6 +21,7 @@
      "parskip"
      "fouriernc"
      "amsmath"
+     "cite"
      "caption"
      "graphicx"
      "multicol"
