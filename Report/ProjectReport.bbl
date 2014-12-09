@@ -1,0 +1,20 @@
+\begin{thebibliography}{1}
+
+\bibitem{DiRaimondo:2005:SOM:1102199.1102216}
+Mario Di~Raimondo, Rosario Gennaro, and Hugo Krawczyk.
+\newblock Secure off-the-record messaging.
+\newblock In {\em Proceedings of the 2005 ACM Workshop on Privacy in the
+  Electronic Society}, WPES '05, pages 81--89, New York, NY, USA, 2005. ACM.
+
+\bibitem{diffie1976new}
+Whitfield Diffie and Martin~E Hellman.
+\newblock New directions in cryptography.
+\newblock {\em Information Theory, IEEE Transactions on}, 22(6):644--654, 1976.
+
+\bibitem{PidginEncryption}
+Bill Tompkins.
+\newblock Pidgin-encryption.
+\newblock http://pidgin-encrypt.sourceforge.net/.
+\newblock Accessed: 2014-12-08.
+
+\end{thebibliography}
