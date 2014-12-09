@@ -11,6 +11,12 @@ Whitfield Diffie and Martin~E Hellman.
 \newblock New directions in cryptography.
 \newblock {\em Information Theory, IEEE Transactions on}, 22(6):644--654, 1976.
 
+\bibitem{TwistedHomepage}
+Twisted~Matrix Labs.
+\newblock Twisted matrix.
+\newblock https://twistedmatrix.com/trac/.
+\newblock Accessed: 2014-12-09.
+
 \bibitem{PidginEncryption}
 Bill Tompkins.
 \newblock Pidgin-encryption.

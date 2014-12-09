@@ -134,6 +134,9 @@ Although mechanism 1 and 2 can be used independently to protect against external
 Note that these ambiguities in the protocol allow for a user-configurable level of protection.
 
 \section{Implementation}
+To demonstrate the functionality and ease of deployment, we developed a proof of concept implementation of MSAP.  Our prototype is written in Python, and utilizes an XMPP chat protocol implementation built on the Twisted library \cite{TwistedHomepage}.  Our implementation can be found in the GitHub repository, https://github.com/cs6490groupJMR/ProtoSecureChat.
+
+By building on top of an existing library, our implementation demonstrates that MSAP is a trivial extension to any multi-service chat client.  Additionally, by examining the actual messages as seen by the IM service providers, our implementation shows that this trivial extension indeed offers the level of security we claim in this paper.
 
 \section{Conclusion}
 MSAP offers a much easier and more streamlined method for achieving privacy and integrity protection on top of publicly available IM services such as Google Hangouts, Facebook Chat, Skype, etc.  By requiring only that users have accounts with more than one IM service, MSAP can ensure that these services are not able to read or modify the contents of conversations.  This is a much lower barrier than requiring the trust of a 3rd party authentication service, or the configuration of public key signature solutions.
