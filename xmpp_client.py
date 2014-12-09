@@ -12,7 +12,6 @@ $ python xmpp_client.py <jid> <secret>
 
 import math
 from colorconsole import terminal
-from subprocess import Popen, CREATE_NEW_CONSOLE
 
 screen = terminal.get_terminal()
 screen.set_title("ProtoSecureChat")
@@ -171,47 +170,20 @@ if __name__ == '__main__':
     print 'Argument List:', str(sys.argv)
     print "\n"
 
-    i =0
-    
-    print "\n"
+    if (len(sys.argv) == 2):
+        if(sys.argv[1] == "alice"):
+            choice1, username1, pass1, choice2, username2, pass2, chatbuddy1, chatbuddy2 = ["2","alice_s0","123456789","2","alice_s1","123456789","bob_s0","bob_s1"]
+        elif(sys.argv[1] == "bob"):
+            choice1, username1, pass1, choice2, username2, pass2, chatbuddy1, chatbuddy2 = ["2","bob_s0","123456789","2","bob_s1","123456789","",""]
+        else:
+            print "Must choose alice or bob (python xmpp_client.py alice)"
+            sys.exit()
 
-    if (len(sys.argv) == 9):
-        tmp, choice1, username1, pass1, choice2, username2, pass2, chatbuddy1, chatbuddy2 =  sys.argv
-    elif (len(sys.argv) == 7):
-        tmp, choice1, username1, pass1, choice2, username2, pass2 =  sys.argv
-        chatbuddy1 = ""
-        chatbuddy2 = ""
-    else:
-        print "Available services are : \n"
-        for server in servers:
-            print '{0} :{1}'.format(i,server['name'])
-            i+=1
+        if (chatbuddy1!=""):
+            print "I will connect to {0} and {1}".format(chatbuddy1,chatbuddy2)
+        else :
+            print "I will wait for incoming connection"
 
-        choice1 = raw_input("Please enter your 1st service: ")
-        username1 = raw_input("Please enter your user name: ")
-        pass1 = raw_input("Please enter your password: ")
-        chatbuddy1 = raw_input("Please enter your chat buddy: ")
-
-        print "\n\n"
-        choice2 = raw_input("Please enter your 2st service: ")
-        username2 = raw_input("Please enter your user name: ")
-        pass2 = raw_input("Please enter your password: ")
-        chatbuddy2 = raw_input("Please enter your chat buddy: ")
-
-    
-
-    # now lunch other application!
-    if (chatbuddy1!=""):
-        print "I will connect to {0} and {1}".format(chatbuddy1,chatbuddy2)
-        p = Popen('python xmpp_client.py 2 bob_s0 123456789 2 bob_s1 123456789', creationflags=CREATE_NEW_CONSOLE)
-    else :
-        print "I will wait for incoming connection"
-
-
-    react(main,[username1+servers[int(choice1)]['url'],pass1,chatbuddy1+servers[int(choice1)]['url'],username2+servers[int(choice2)]['url'],pass2,chatbuddy2+servers[int(choice2)]['url']])
-    #react(main,[username1+servers[int(choice1)]['url'],pass1,username1+servers[int(choice1)]['url'],pass1])
-        
-    if (p):
-        p.terminate()
+        react(main,[username1+servers[int(choice1)]['url'],pass1,chatbuddy1+servers[int(choice1)]['url'],username2+servers[int(choice2)]['url'],pass2,chatbuddy2+servers[int(choice2)]['url']])
         
     screen.set_color(15, 0)

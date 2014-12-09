@@ -71,8 +71,13 @@ class Protocol(object):
     # decrypt the nonce received and combine it with our nonce and create a session key.
     def computeSessionKey(self, nonceReceived):
         nonceReceivedDec = common.decrypt(self.DHKey, nonceReceived)
-        combinedNonces = self.myNonce+nonceReceivedDec+self.myNonce+nonceReceivedDec
+        combinedNonces = string.replace(self.myNonce+nonceReceivedDec+self.myNonce+nonceReceivedDec, "=", "")
         self.sessionkey = common.generateKey(combinedNonces)
 
+    # encrypts a message with the session key.
     def encryptMessage(self, message):
         return common.encrypt(self.sessionkey, message)
+
+    # decrypts a message with the session key.
+    def decryptMessage(self, message):
+        return common.decrypt(self.sessionkey, message)
