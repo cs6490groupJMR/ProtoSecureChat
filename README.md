@@ -12,11 +12,15 @@ To send a facebook message:
 
 python xmpp_client.py
 
-You will be prompted for the xmpp user and password.
+You will be prompted for the xmpp user and password and chatbuddy!
 
 On dukgo currently these user/pass are hardcoded into the code and are used:
 
 alice_s0,alice_s1,bob_s0,bob_s1        pass:123456789
+
+lunch program like this :
+
+xmpp_client.py 2 alice_s0 123456789 2 alice_s1 123456789 bob_s0 bob_s1
 
 This will be repeated for the second account you will use.
 The facebook friend id will be prompted.
