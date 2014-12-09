@@ -15,11 +15,11 @@ class Protocol(object):
     # xmpp_client expects at least two elements inside the result list
     def processIncomingMSG_and_Answer(self, message):
         result = []
-        if (msgLevel == 0):
-            if ((message == msgAuth) or (message == "")):
+        if (self.msgLevel == 0):
+            if ((message == self.msgAuth) or (message == "")):
                 self.msgLevel+=1
                 result.append("")
-                result.append(msgAuth)
+                result.append(self.msgAuth)
                 return result
             else:
                 #dont increase msglevel just return
@@ -27,7 +27,7 @@ class Protocol(object):
                 result.append("")
                 return result
         #this is template...should be implemented!
-        if (msgLevel == 1):
+        if (self.msgLevel == 1):
             #so to distinguish is it service0 or service n
             if (s_id==0):
                 self.msgLevel+=1
