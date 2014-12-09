@@ -15,7 +15,9 @@ python xmpp_client.py
 You will be prompted for the xmpp user and password.
 
 On dukgo currently these user/pass are hardcoded into the code and are used:
+
 alice_s0,alice_s1,bob_s0,bob_s1        pass:123456789
+
 This will be repeated for the second account you will use.
 The facebook friend id will be prompted.
 
