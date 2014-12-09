@@ -28,7 +28,7 @@ from twisted.names.srvconnect import SRVConnector
 from twisted.words.xish import domish
 from twisted.words.protocols.jabber import xmlstream, client
 from twisted.words.protocols.jabber.jid import JID
-import common
+import protocol
 
 cColor = 1
 
@@ -39,6 +39,7 @@ class Client(object):
         self.textColor = cColor
         cColor +=1
         self.reactor = reactor
+        self.proto = protocol.Protocol()
         f = client.XMPPClientFactory(jid, secret)
         f.addBootstrap(xmlstream.STREAM_CONNECTED_EVENT, self.connected)
         f.addBootstrap(xmlstream.STREAM_END_EVENT, self.disconnected)
@@ -108,10 +109,7 @@ class Client(object):
         presence = domish.Element((None, 'presence'))
         xs.send(presence)
 
-        dh = common.initDH()
-        myPKey = common.getGHPublicKey(dh)
-        print myPKey
-
+        myPKey = self.proto.getHelloMessage()
 
         friendid = raw_input("Please enter your friends username/friendid for {0} :".format(self.jid))
 

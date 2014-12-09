@@ -37,10 +37,9 @@ def setPadding(data):
         data += ' '
     return data
 
-# Generate a new key pair of an iv and a key, encoded in base 64.
-def generateKey():
-    rand = Random.new()
-    return (base64.b64encode(rand.read(16)), base64.b64encode(rand.read(8)))
+# Generate a key pair of an iv and a key, encoded in base 64, from a given key.
+def generateKey(key):
+    return (base64.b64encode(base64.b64decode(key[:22]+'==')), base64.b64encode(base64.b64decode(key[22:33]+'=')))
 
 # initialize a new DiffieHellman exchange.
 def initDH():
@@ -52,5 +51,5 @@ def getGHPublicKey(dh):
 
 # Get the shared key using the public key sent from the other client, as well as our key.
 def computeDHkey(dh, pubKey):
-    pkey = base64.b64decode(pubKey)
-    return base64.b64encode(dh.computeKey(pkey))
+    skey = base64.b64decode(pubKey)
+    return base64.b64encode(dh.computeKey(skey))
