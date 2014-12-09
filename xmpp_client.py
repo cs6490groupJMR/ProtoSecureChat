@@ -80,11 +80,14 @@ class Client(object):
         for element in message.elements():
           if element.name == 'body':
             body = unicode(element).strip()
-            usertxt, chatbuddytxt = self.proto.processIncomingMSG_and_Answer(body)
-            if (usertxt!=""):
-                print usertxt
-            if (chatbuddytxt!=""):
-                self.sendMessage(self.chatbuddy, chatbuddytxt)
+            answer = self.proto.processIncomingMSG_and_Answer(body)
+            
+            if (answer[0]!=""):
+                print answer[0]
+
+            for txt in answer[1:]:
+                if (txt!=""):
+                    self.sendMessage(self.chatbuddy, txt)
 
             #self.send_message(message['from'], 'tetet')
             break
@@ -97,6 +100,8 @@ class Client(object):
 
     
     def sendMessage(self, to, data):
+        if (data==""):
+            return
         screen.set_color(self.textColor, 0)
         message = domish.Element((None, 'message'))
         message['to'] = to
@@ -114,7 +119,8 @@ class Client(object):
         presence = domish.Element((None, 'presence'))
         xs.send(presence)
 
-        usertxt, chatbuddytxt = self.proto.processIncomingMSG_and_Answer(body)
+        #if it was alreadu authenticated from incoming message it should return "" and we are good!
+        usertxt, chatbuddytxt = self.proto.processIncomingMSG_and_Answer("")
 
         self.sendMessage(self.chatbuddy, chatbuddytxt)
         #this makes program terminate!

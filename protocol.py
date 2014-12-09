@@ -10,29 +10,41 @@ class Protocol(object):
         self.s_id = s_id
 
     # This should be the main communication port of this class. Depending on its level answer and increase the msgLevel
-    # return value is (text for user , msg back to chat buddy)
+    # return value is (text for user , msg back to chat buddy0, msg to chat buddy1)
     # so after chat has begun user can see unencrypted messages!
+    # xmpp_client expects at least two elements inside the result list
     def processIncomingMSG_and_Answer(self, message):
+        result = []
         if (msgLevel == 0):
             if ((message == msgAuth) or (message == "")):
                 self.msgLevel+=1
-                return ("", msgAuth)
+                result.append("")
+                result.append(msgAuth)
+                return result
             else:
                 #dont increase msglevel just return
-                return ("","")
+                result.append("")
+                result.append("")
+                return result
         #this is template...should be implemented!
         if (msgLevel == 1):
             #so to distinguish is it service0 or service n
             if (s_id==0):
                 self.msgLevel+=1
-                return ("","")
+                result.append("")
+                result.append("")
+                return result
             else:
                 self.msgLevel+=1
-                return ("","")
+                result.append("")
+                result.append("")
+                return result
 
 
 
-        return ("","")
+        result.append("")
+        result.append("")
+        return result
 
     # return the standardized protocol hello message.
     def getHelloMessage(self):
