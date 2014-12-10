@@ -61,6 +61,7 @@ class Client(object):
 
     def setOtherClass(self, s1):
         self.s1 = s1
+        self.s1.proto.dh = self.proto.dh
     
     def rawDataIn(self, buf):
         screen.set_color(self.textColor, 0)
@@ -105,6 +106,8 @@ class Client(object):
                     #this will cause the other one to initiate messages!
                         
                     new_usertxt, new_chatbuddytxt = self.s1.proto.processIncomingMSG_and_Answer(chatbuddytxt[i+1])
+                    if (new_usertxt!=""):
+                        print new_usertxt
                     self.sendMessage(self.s1.chatbuddy_jid, new_chatbuddytxt)
                     break
                     
@@ -155,6 +158,8 @@ class Client(object):
         if (self.chatbuddy_jid.user == "bob_s0") or (self.chatbuddy_jid.user == "bob_s1"):
             #if it was alreadu authenticated from incoming message it should return "" and we are good!
             usertxt, chatbuddytxt = self.proto.processIncomingMSG_and_Answer("")
+            if (usertxt!=""):
+                print usertxt
             self.sendMessage(self.chatbuddy_jid, chatbuddytxt)
             #another ugly hack!
             #the problem is due to how we impl. and used protocol. alice is not one entity!
@@ -189,6 +194,7 @@ def main(reactor, jid1, secret1, chatbuddy1, jid2, secret2, chatbuddy2):
     """
 
     services = [Client(reactor, JID(jid1), secret1, JID(chatbuddy1),0), Client(reactor, JID(jid2), secret2, JID(chatbuddy2),1)]
+
     services[0].setOtherClass(services[1])
     services_finish = [services[0].finished, services[1].finished]
     #services = [Client(reactor, JID(jid1), secret1).finished]
@@ -210,7 +216,7 @@ if __name__ == '__main__':
         if(sys.argv[1] == "alice"):
             choice1, username1, pass1, choice2, username2, pass2, chatbuddy1, chatbuddy2 = ["2","alice_s0","123456789","2","alice_s1","123456789","bob_s0","bob_s1"]
         elif(sys.argv[1] == "bob"):
-            choice1, username1, pass1, choice2, username2, pass2, chatbuddy1, chatbuddy2 = ["2","bob_s0","123456789","2","bob_s1","123456789","alice_s0","alice_s0"]
+            choice1, username1, pass1, choice2, username2, pass2, chatbuddy1, chatbuddy2 = ["2","bob_s0","123456789","2","bob_s1","123456789","alice_s0","alice_s1"]
         else:
             print "Must choose alice or bob (python xmpp_client.py alice)"
             sys.exit()

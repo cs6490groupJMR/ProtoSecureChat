@@ -33,11 +33,12 @@ class Protocol(object):
                 if (message==""): #this is alice
 
                     return ("",[""])
-                else:
+                else:#this is bob
                     #this is like a fake recieved msg to get complete DH
                     self.getPublicKeyMessage("")
                     self.computeDHkey(message)
-
+                    #increase one more msg to ease my life!!
+                    self.msgLevel+=1
                     return ("I have a shared key now!! :"+self.sharedKey,[self.myPKey])
 
 
@@ -48,12 +49,50 @@ class Protocol(object):
                 #so meaning ignore all messages in this service!
                 return ("",[""])
             else:#this is service 1
-                if (message==""):#this is alice
+                if (message!=""):#this is alice
                     self.computeDHkey(message)
-                    return ("I have a shared key now!! :"+self.sharedKey,[""])
+                    self.msgLevel+=1
+                    return ("I have a shared key now!! :"+self.sharedKey,[self.getEncryptedNonce()])
+                else:#this is bob - but shouldnt happened
+                    
+                    return ("Errr - shouldnt be called :",[""])
 
 
+        if (self.msgLevel == 2):
+            self.msgLevel+=1
+            if (self.s_id==0):# this is service 0
+                self.msgLevel-=1
+                #so meaning ignore all messages in this service!
+                return ("",[""])
+            else:#this is service 1
+                if (message!=""):#this is bob
+                    N_b = self.getEncryptedNonce()
+                    self.computeSessionKey(message)
+                    self.msgLevel+=1 #this is 4 now for bob
+                    return ("I have a session key now!! :"+self.sessionkey,[N_b])
+                else:#this is ???!!!
 
+                    return ("Errrr ",[""])
+
+        if (self.msgLevel == 3):
+            self.msgLevel+=1
+            if (self.s_id==0):# this is service 0
+                self.msgLevel-=1
+                #so meaning ignore all messages in this service!
+                return ("",[""])
+            else:#this is service 1
+                if (message!=""):#this is Alice
+                    N_a = self.getEncryptedNonce()
+                    self.computeSessionKey(message)
+
+                    return ("I have a session key now!! :"+self.sessionkey,[encryptMessage("test message 1")])
+                else:#this is ???!!!
+
+                    return ("Errrr",[""])
+
+        if (self.msgLevel == 4):
+            txt = decryptMessage(message)
+            return (txt,[encryptMessage("test message - rest!!")])
 
 
         return ("",[""])
