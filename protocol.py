@@ -58,10 +58,6 @@ class Protocol(object):
 
         return ("",[""])
 
-    # return the standardized protocol hello message.
-    def getHelloMessage(self):
-        return "Authenticate"
-
     # return the public DH key, which is g^a mod p.
     def getPublicKeyMessage(self, nextSvc):
         self.myPKey = common.getGHPublicKey(self.dh)
@@ -78,12 +74,12 @@ class Protocol(object):
     def getEncryptedNonce(self):
         self.DHKey = common.generateKey(self.sharedKey)
         self.myNonce = common.getNonce()
-        return common.encrypt(self.DHKey, nonce)
+        return common.encrypt(self.DHKey, self.myNonce)
 
     # decrypt the nonce received and combine it with our nonce and create a session key.
     def computeSessionKey(self, nonceReceived):
         nonceReceivedDec = common.decrypt(self.DHKey, nonceReceived)
-        combinedNonces = string.replace(self.myNonce+nonceReceivedDec+self.myNonce+nonceReceivedDec, "=", "")
+        combinedNonces = common.xorNonces(self.myNonce, nonceReceivedDec)
         self.sessionkey = common.generateKey(combinedNonces)
 
     # encrypts a message with the session key.
