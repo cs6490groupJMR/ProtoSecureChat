@@ -43,7 +43,7 @@ class Client(object):
         self.textColor = cColor
         cColor +=1
         self.reactor = reactor
-        self.proto = protocol.Protocol(s_id)
+        self.proto = protocol.Protocol(self.s_id)
         f = client.XMPPClientFactory(jid, secret)
         f.addBootstrap(xmlstream.STREAM_CONNECTED_EVENT, self.connected)
         f.addBootstrap(xmlstream.STREAM_END_EVENT, self.disconnected)
@@ -79,13 +79,15 @@ class Client(object):
 
     def handle_message(self, message):
         screen.set_color(self.textColor, 0)
+        print 'a message is recieved :'
+        print message
 
         for element in message.elements():
           if element.name == 'body':
             body = unicode(element).strip()
             answer = self.proto.processIncomingMSG_and_Answer(body)
-            print 'a message is recieved :'
-            print body
+            
+            
             if (answer[0]!=""):
                 print answer[0]
 
