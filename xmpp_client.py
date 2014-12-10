@@ -97,7 +97,7 @@ class Client(object):
             if (answer[0]!=""):
                 print answer[0]
 
-            for i,txt in enumerate(answer[1:]):
+            for i in range(1,len(answer)):
                 if (txt=="NextSvc"):#so protocol wants to jump to other client
                     assert(self.s1)
                     #this will cause the other one to initiate messages!
