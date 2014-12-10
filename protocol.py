@@ -31,11 +31,11 @@ class Protocol(object):
 
             else:# this is service 1
                 if (message==""): #this is alice
-                    return ("","")
+                    return ("",[""])
                 else:
                 #dont increase msglevel just return
                     self.getPublicKeyMessage("")
-                    self.computeDHkey(message.split(":"))
+                    self.computeDHkey(message)
 
                     return ("I have a shared key now!!","")
         #this is template...should be implemented!
@@ -44,15 +44,15 @@ class Protocol(object):
             if (s_id==0):
                 self.msgLevel+=1
 
-                return ("","")
+                return ("",[""])
             else:
                 self.msgLevel+=1
 
-                return ("","")
+                return ("",[""])
 
 
 
-        return ("","")
+        return ("",[""])
 
     # return the standardized protocol hello message.
     def getHelloMessage(self):

@@ -91,23 +91,24 @@ class Client(object):
           if element.name == 'body':
             body = unicode(element).strip()
             print body
-            answer = self.proto.processIncomingMSG_and_Answer(body)
+            usertxt, chatbuddytxt = self.proto.processIncomingMSG_and_Answer(body)
             
             
-            if (answer[0]!=""):
-                print answer[0]
+            if (usertxt!=""):
+                print usertxt
 
-            for i in range(1,len(answer)):
-                if (txt=="NextSvc"):#so protocol wants to jump to other client
+
+            for i in range(len(chatbuddytxt)):
+                if (chatbuddytxt[i]=="NextSvc"):#so protocol wants to jump to other client
                     assert(self.s1)
                     #this will cause the other one to initiate messages!
                         
-                    usertxt, chatbuddytxt = s1.processIncomingMSG_and_Answer(answer[i+1])
-                    sendMessage(s1.chatbuddy_jid, chatbuddytxt)
+                    new_usertxt, new_chatbuddytxt = self.s1.proto.processIncomingMSG_and_Answer(chatbuddytxt[i+1])
+                    self.sendMessage(self.s1.chatbuddy_jid, new_chatbuddytxt)
                     
-                elif (txt!=""):
-                    print 'response to that message : {0}'.format(txt)
-                    self.sendMessage(self.chatbuddy_jid, txt)
+                elif (chatbuddytxt[i]!=""):
+                    print 'response to that message : {0}'.format(chatbuddytxt[i])
+                    self.sendMessage(self.chatbuddy_jid, chatbuddytxt[i])
                 
 
             #self.send_message(message['from'], 'tetet')
@@ -119,22 +120,24 @@ class Client(object):
 
         self.finished.callback(None)
 
-    
+    # data can be list or string!
     def sendMessage(self, to, data):
-        if (data==""):
-            return
-        if (not self.hasAuthenticated):
-            self.recordedMsgs.append({'to':to,'data':data})
-            return
+        for dt in data if not isinstance(data, basestring) else [data]:
+            if (dta==""):
+                return
 
-        screen.set_color(self.textColor, 0)
-        message = domish.Element((None, 'message'))
-        message['to'] = to.full()
-        #google doesnt like from tag, it should acompany id too! just ignoring it seems to work!
-        #message['from'] = self.jid.full()
-        message['type'] = 'chat'
-        message.addElement('body', content= data)
-        self.xmlstream.send(message)
+            if (not self.hasAuthenticated):
+                self.recordedMsgs.append({'to':to,'data':dt})
+                return
+
+            screen.set_color(self.textColor, 0)
+            message = domish.Element((None, 'message'))
+            message['to'] = to.full()
+            #google doesnt like from tag, it should acompany id too! just ignoring it seems to work!
+            #message['from'] = self.jid.full()
+            message['type'] = 'chat'
+            message.addElement('body', content= dt)
+            self.xmlstream.send(message)
 
 
     def authenticated(self, xs):
@@ -149,8 +152,7 @@ class Client(object):
         if (self.chatbuddy_jid.user != None):
             #if it was alreadu authenticated from incoming message it should return "" and we are good!
             usertxt, chatbuddytxt = self.proto.processIncomingMSG_and_Answer("")
-            for txt in chatbuddytxt:
-                self.sendMessage(self.chatbuddy_jid, txt)
+            self.sendMessage(self.chatbuddy_jid, chatbuddytxt)
     
         if (self.recordedMsgs != []):
             for msg in self.recordedMsgs:
