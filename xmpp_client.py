@@ -34,7 +34,9 @@ import protocol
 cColor = 2
 
 class Client(object):
+    recordedMsgs = []
     # s_id is service id number, 0 or 1 
+    # s1 is other service. so Ugly! - only used in client0
     def __init__(self, reactor, jid, secret, chatbuddy_jid, s_id):
         global cColor
         self.jid=jid
@@ -44,6 +46,7 @@ class Client(object):
         cColor +=1
         self.reactor = reactor
         self.proto = protocol.Protocol(self.s_id)
+        self.hasAuthenticated = False
         f = client.XMPPClientFactory(jid, secret)
         f.addBootstrap(xmlstream.STREAM_CONNECTED_EVENT, self.connected)
         f.addBootstrap(xmlstream.STREAM_END_EVENT, self.disconnected)
@@ -55,6 +58,9 @@ class Client(object):
         self.finished = Deferred()
 
 
+    def setOtherClass(self, s1):
+        self.s1 = s1
+    
     def rawDataIn(self, buf):
         screen.set_color(self.textColor, 0)
         #print "RECV: %s" % unicode(buf, 'utf-8').encode('ascii', 'replace')
@@ -79,21 +85,30 @@ class Client(object):
 
     def handle_message(self, message):
         screen.set_color(self.textColor, 0)
-        print 'a message is recieved :'
-        print message
+        print 'A message is recieved :'
 
         for element in message.elements():
           if element.name == 'body':
             body = unicode(element).strip()
+            print body
             answer = self.proto.processIncomingMSG_and_Answer(body)
             
             
             if (answer[0]!=""):
                 print answer[0]
 
-            for txt in answer[1:]:
-                if (txt!=""):
+            for i,txt in enumerate(answer[1:]):
+                if (txt=="NextSvc"):#so protocol wants to jump to other client
+                    assert(self.s1)
+                    #this will cause the other one to initiate messages!
+                        
+                    usertxt, chatbuddytxt = s1.processIncomingMSG_and_Answer(answer[i+1])
+                    sendMessage(s1.chatbuddy_jid, chatbuddytxt)
+                    
+                elif (txt!=""):
+                    print 'response to that message : {0}'.format(txt)
                     self.sendMessage(self.chatbuddy_jid, txt)
+                
 
             #self.send_message(message['from'], 'tetet')
             break
@@ -108,6 +123,10 @@ class Client(object):
     def sendMessage(self, to, data):
         if (data==""):
             return
+        if (not self.hasAuthenticated):
+            self.recordedMsgs.append({'to':to,'data':data})
+            return
+
         screen.set_color(self.textColor, 0)
         message = domish.Element((None, 'message'))
         message['to'] = to.full()
@@ -119,6 +138,7 @@ class Client(object):
 
 
     def authenticated(self, xs):
+        self.hasAuthenticated = True
         screen.set_color(self.textColor, 0)
         print "Authenticated."
 
@@ -129,8 +149,12 @@ class Client(object):
         if (self.chatbuddy_jid.user != None):
             #if it was alreadu authenticated from incoming message it should return "" and we are good!
             usertxt, chatbuddytxt = self.proto.processIncomingMSG_and_Answer("")
-            self.sendMessage(self.chatbuddy_jid, chatbuddytxt)
-
+            for txt in chatbuddytxt:
+                self.sendMessage(self.chatbuddy_jid, txt)
+    
+        if (self.recordedMsgs != []):
+            for msg in self.recordedMsgs:
+                self.sendMessage(msg['to'],msg['data'])
         #this makes program terminate! 60 should be enoguh for debugging purposes!
         self.reactor.callLater(60, xs.sendFooter)
 
@@ -154,10 +178,12 @@ def main(reactor, jid1, secret1, chatbuddy1, jid2, secret2, chatbuddy2):
     @param secret: A C{str}
     """
 
-    services = [Client(reactor, JID(jid1), secret1, JID(chatbuddy1),0).finished, Client(reactor, JID(jid2), secret2, JID(chatbuddy2),1).finished]
+    services = [Client(reactor, JID(jid1), secret1, JID(chatbuddy1),0), Client(reactor, JID(jid2), secret2, JID(chatbuddy2),1)]
+    services[0].setOtherClass(services[1])
+    services_finish = [services[0].finished, services[1].finished]
     #services = [Client(reactor, JID(jid1), secret1).finished]
-    
-    d = defer.gatherResults(services)
+
+    d = defer.gatherResults(services_finish)
     #d.addCallback(lambda ignored: reactor.stop())
 
     return d

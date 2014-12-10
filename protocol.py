@@ -16,35 +16,43 @@ class Protocol(object):
     def processIncomingMSG_and_Answer(self, message):
         result = []
         if (self.msgLevel == 0):
-            if ((message == self.msgAuth) or (message == "")):
-                self.msgLevel+=1
-                result.append("")
-                result.append(self.msgAuth)
-                return result
-            else:
+            self.msgLevel+=1
+            if (self.s_id == 0):# this is service 0
+                if (message==""): #this is alice
+                    self.getPublicKeyMessage("")
+                    result.append(self.myPKey)
+                    result.append("NextSvc") #when sent to bob1, bob1 will create g^b mod p
+                    return ("",result)
+                else:#this is bob
+                    otherPKey = message
+                    result.append("NextSvc") #when sent to bob1, bob1 will create g^b mod p
+                    result.append(otherPKey)
+                    return ("",result)
+
+            else:# this is service 1
+                if (message==""): #this is alice
+                    return ("","")
+                else:
                 #dont increase msglevel just return
-                result.append("")
-                result.append("")
-                return result
+                    self.getPublicKeyMessage("")
+                    self.computeDHkey(message.split(":"))
+
+                    return ("I have a shared key now!!","")
         #this is template...should be implemented!
         if (self.msgLevel == 1):
             #so to distinguish is it service0 or service n
             if (s_id==0):
                 self.msgLevel+=1
-                result.append("")
-                result.append("")
-                return result
+
+                return ("","")
             else:
                 self.msgLevel+=1
-                result.append("")
-                result.append("")
-                return result
+
+                return ("","")
 
 
 
-        result.append("")
-        result.append("")
-        return result
+        return ("","")
 
     # return the standardized protocol hello message.
     def getHelloMessage(self):
@@ -52,11 +60,11 @@ class Protocol(object):
 
     # return the public DH key, which is g^a mod p.
     def getPublicKeyMessage(self, nextSvc):
-        self.myPKey = common.getGHPublicKey(dh)
+        self.myPKey = common.getGHPublicKey(self.dh)
         if not nextSvc:
-            return myPKey
+            return self.myPKey
         else:
-            return myPKey+":"+nextSvc
+            return self.myPKey+":"+nextSvc
 
     # determine the full DH key, which is g^ab mod p. Must be given the remote DH public key, g^b mod p.
     def computeDHkey(self, pubKey):
