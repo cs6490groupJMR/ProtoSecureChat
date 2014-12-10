@@ -1,12 +1,13 @@
 from Crypto import Random
 from Crypto.Cipher import DES3
+from itertools import izip
 import base64
 import DH
 
-# This returns a 64 bit nonce using a good random number generator.
+# This returns a 192 bit nonce using a good random number generator.
 def getNonce():
-    # This generator takes in bytes, so 8 bytes = 64 bits
-    return base64.b64encode(Random.new().read(8))
+    # This generator takes in bytes, so 24 bytes = 192 bits
+    return base64.b64encode(Random.new().read(24))
 
 # Using the given key, encrypt the given data with DES3 and CBC.
 def encrypt(key, data):
@@ -36,6 +37,10 @@ def setPadding(data):
     while(len(data) % 8 != 0):
         data += ' '
     return data
+
+def xorNonces(nonce1, nonce2):
+    xored = ''.join(chr(ord(x) ^ ord(y)) for (x,y) in izip(nonce1,nonce2))
+    return base64.encodestring(xored).strip()
 
 # Generate a key pair of an iv and a key, encoded in base 64, from a given key.
 def generateKey(key):
