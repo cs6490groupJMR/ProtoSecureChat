@@ -52,7 +52,8 @@ class Protocol(object):
                 if (message!=""):#this is alice
                     self.computeDHkey(message)
                     self.msgLevel+=1
-                    return ("I have a shared key now!! :"+self.sharedKey,[self.getEncryptedNonce()])
+                    N_a = self.getEncryptedNonce()
+                    return ("I have a shared key now!! :"+self.sharedKey,[N_a])
                 else:#this is bob - but shouldnt happened
                     
                     return ("Errr - shouldnt be called :",[""])
@@ -69,7 +70,7 @@ class Protocol(object):
                     N_b = self.getEncryptedNonce()
                     self.computeSessionKey(message)
                     self.msgLevel+=1 #this is 4 now for bob
-                    return ("I have a session key now!! :"+self.sessionkey,[N_b])
+                    return ("I have a session key now!! :",[N_b])
                 else:#this is ???!!!
 
                     return ("Errrr ",[""])
@@ -82,17 +83,16 @@ class Protocol(object):
                 return ("",[""])
             else:#this is service 1
                 if (message!=""):#this is Alice
-                    N_a = self.getEncryptedNonce()
                     self.computeSessionKey(message)
 
-                    return ("I have a session key now!! :"+self.sessionkey,[encryptMessage("test message 1")])
+                    return ("I have a session key now!!\n sending my first msg! :",[self.encryptMessage("test message 1")])
                 else:#this is ???!!!
 
                     return ("Errrr",[""])
 
         if (self.msgLevel == 4):
-            txt = decryptMessage(message)
-            return (txt,[encryptMessage("test message - rest!!")])
+            txt = self.decryptMessage(message)
+            return (txt,[self.encryptMessage("test message - rest!!")])
 
 
         return ("",[""])
