@@ -11,12 +11,13 @@
      "fig:basicProto"
      "fig:sslProto")
     (TeX-run-style-hooks
+     "times"
      "geometry"
      "columnsep=20pt"
      "right=.5in"
      "left=.5in"
-     "bottom=.5in"
-     "top=.5in"
+     "bottom=.75in"
+     "top=.75in"
      "amssymb"
      "parskip"
      "fouriernc"

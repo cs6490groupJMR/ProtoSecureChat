@@ -1,7 +1,7 @@
 \documentclass[twoside,10pt]{article}
 \usepackage{multicol,graphicx,caption,cite}
 \usepackage{amsmath,fouriernc,parskip,amssymb}
-\usepackage[top=.5in,bottom=.5in,left=.5in,right=.5in,columnsep=20pt]{geometry}
+\usepackage[top=.75in,bottom=.75in,left=.5in,right=.5in,columnsep=20pt]{geometry}
 \setlength{\parindent}{2em}
 \setlength{\parskip}{0em}
 
@@ -26,7 +26,7 @@
 %\renewcommand*\includegraphics[2][]{%
 %    \resizebox{\ScaleIfNeeded}{!}{\origincludegraphics[#1]{#2}}%
 %}
-
+\usepackage{times}
 \begin{document}
 \maketitle
 \newpage
@@ -41,7 +41,7 @@ In this paper, we focus on instant messaging (IM) communication because it is a 
 
 It would be desirable to have a method for encryption and integrity protection that does not require external authentication (which means an additional service to trust), and does not use complicated public key signature schemes for integrity protection.
 
-We present the Multiple Service Authentication Protocol (MSAP), a protocol for establishing shared session keys to be used for encryption and integrity protection of instant messaging (IM) communications. Unlike existing solutions, MSAP does not, itself, rely on public key authentication.  Instead, MSAP relies on the authentication performed by service providers such as Google, Microsoft, or Facebook to verify the identities of IM conversation participants.  IM service providers have an incentive to deliver messages to the intended recipient, as well as to ensure that only the intended recipient has access to delivered messages.  Without this, their service is of little use and they would have no user base.  To ensure these criteria, an IM service must authenticate users.
+We present the Multiple Service Authentication Protocol (MSAP), a protocol for establishing shared session keys to be used for encryption and integrity protection of instant messaging (IM) communications. Unlike existing solutions, MSAP does not, itself, rely on public key authentication.  Instead, MSAP relies on the authentication performed by service providers such as Google, Microsoft, or Facebook to verify the identities of IM conversation participants.  IM service providers have an incentive to deliver messages to the intended recipient, as well as to ensure that only the intended recipient has access to delivered messages.  Without this, their service is of little use and they would have no user base.  To ensure these criteria, an IM service must accurately and securely authenticate users, while ensuring impostors do not gain access.
 
 Further, the protocol ensures that service providers do not have access to the shared session keys, and importantly, prevents service providers from employing a man in the middle (MitM) attack and acting as an interfering intermediary between the two communicating parties.
 
