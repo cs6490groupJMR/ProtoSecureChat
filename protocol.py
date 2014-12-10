@@ -21,7 +21,7 @@ class Protocol(object):
                 if (message==""): #this is alice
                     self.getPublicKeyMessage("")
                     result.append(self.myPKey)
-                    result.append("NextSvc") #when sent to bob1, bob1 will create g^b mod p
+                    #result.append("NextSvc") #when sent to bob1, bob1 will create g^b mod p
                     return ("",result)
                 else:#this is bob
                     otherPKey = message
@@ -31,24 +31,28 @@ class Protocol(object):
 
             else:# this is service 1
                 if (message==""): #this is alice
+
                     return ("",[""])
                 else:
-                #dont increase msglevel just return
+                    #this is like a fake recieved msg to get complete DH
                     self.getPublicKeyMessage("")
                     self.computeDHkey(message)
 
-                    return ("I have a shared key now!!","")
-        #this is template...should be implemented!
+                    return ("I have a shared key now!! :"+self.sharedKey,[self.myPKey])
+
+
         if (self.msgLevel == 1):
-            #so to distinguish is it service0 or service n
-            if (s_id==0):
-                self.msgLevel+=1
-
+            self.msgLevel+=1
+            if (self.s_id==0):# this is service 0
+                self.msgLevel-=1
+                #so meaning ignore all messages in this service!
                 return ("",[""])
-            else:
-                self.msgLevel+=1
+            else:#this is service 1
+                if (message==""):#this is alice
+                    self.computeDHkey(message)
+                    return ("I have a shared key now!! :"+self.sharedKey,[""])
 
-                return ("",[""])
+
 
 
 

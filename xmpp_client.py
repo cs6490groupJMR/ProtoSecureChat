@@ -47,6 +47,7 @@ class Client(object):
         self.reactor = reactor
         self.proto = protocol.Protocol(self.s_id)
         self.hasAuthenticated = False
+        self.s1 = None
         f = client.XMPPClientFactory(jid, secret)
         f.addBootstrap(xmlstream.STREAM_CONNECTED_EVENT, self.connected)
         f.addBootstrap(xmlstream.STREAM_END_EVENT, self.disconnected)
@@ -100,11 +101,12 @@ class Client(object):
 
             for i in range(len(chatbuddytxt)):
                 if (chatbuddytxt[i]=="NextSvc"):#so protocol wants to jump to other client
-                    assert(self.s1)
+                    assert(self.s1!=None)
                     #this will cause the other one to initiate messages!
                         
                     new_usertxt, new_chatbuddytxt = self.s1.proto.processIncomingMSG_and_Answer(chatbuddytxt[i+1])
                     self.sendMessage(self.s1.chatbuddy_jid, new_chatbuddytxt)
+                    break
                     
                 elif (chatbuddytxt[i]!=""):
                     print 'response to that message : {0}'.format(chatbuddytxt[i])
@@ -123,7 +125,7 @@ class Client(object):
     # data can be list or string!
     def sendMessage(self, to, data):
         for dt in data if not isinstance(data, basestring) else [data]:
-            if (dta==""):
+            if (dt==""):
                 return
 
             if (not self.hasAuthenticated):
@@ -149,16 +151,22 @@ class Client(object):
         xs.send(presence)
 
         # here is like a hack to me. This thing should happen when interactively user enters first message and ask for sending message initiation!
-        if (self.chatbuddy_jid.user != None):
+        # too much hack!
+        if (self.chatbuddy_jid.user == "bob_s0") or (self.chatbuddy_jid.user == "bob_s1"):
             #if it was alreadu authenticated from incoming message it should return "" and we are good!
             usertxt, chatbuddytxt = self.proto.processIncomingMSG_and_Answer("")
             self.sendMessage(self.chatbuddy_jid, chatbuddytxt)
+            #another ugly hack!
+            #the problem is due to how we impl. and used protocol. alice is not one entity!
+            if (self.s1!=None):
+                self.s1.proto.myPKey = self.proto.myPKey
+
     
         if (self.recordedMsgs != []):
             for msg in self.recordedMsgs:
                 self.sendMessage(msg['to'],msg['data'])
         #this makes program terminate! 60 should be enoguh for debugging purposes!
-        self.reactor.callLater(60, xs.sendFooter)
+        self.reactor.callLater(600, xs.sendFooter)
 
 
     def init_failed(self, failure):
@@ -202,12 +210,12 @@ if __name__ == '__main__':
         if(sys.argv[1] == "alice"):
             choice1, username1, pass1, choice2, username2, pass2, chatbuddy1, chatbuddy2 = ["2","alice_s0","123456789","2","alice_s1","123456789","bob_s0","bob_s1"]
         elif(sys.argv[1] == "bob"):
-            choice1, username1, pass1, choice2, username2, pass2, chatbuddy1, chatbuddy2 = ["2","bob_s0","123456789","2","bob_s1","123456789","",""]
+            choice1, username1, pass1, choice2, username2, pass2, chatbuddy1, chatbuddy2 = ["2","bob_s0","123456789","2","bob_s1","123456789","alice_s0","alice_s0"]
         else:
             print "Must choose alice or bob (python xmpp_client.py alice)"
             sys.exit()
 
-        if (chatbuddy1!=""):
+        if (chatbuddy1=="bob_s0"):
             print "I will connect to {0} and {1}".format(chatbuddy1,chatbuddy2)
         else :
             print "I will wait for incoming connection"
