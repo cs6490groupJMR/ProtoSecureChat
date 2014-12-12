@@ -4,26 +4,16 @@ ProtoSecureChat
 Uses python2 and the twisted library. See http://twistedmatrix.com/trac/wiki/Downloads for instructions on how to get twisted.
 The license and original file here are from the twisted repo.
 
-Also install pyOpenSSL.
+Also requires pyOpenSSL and pyCrypto.
 
 Current Status
 ===============
-To send a facebook message:
+We have dukgo accounts that are currently hardcoded into the code.
 
-python xmpp_client.py
+You can test with our alice and bob users as follows:
 
-You will be prompted for the xmpp user and password and chatbuddy!
-
-On dukgo currently these user/pass are hardcoded into the code and are used:
-
-alice_s0,alice_s1,bob_s0,bob_s1        pass:123456789
-
-lunch program like this :
-
-xmpp_client.py 2 alice_s0 123456789 2 alice_s1 123456789 bob_s0 bob_s1
-
-This will be repeated for the second account you will use.
-The facebook friend id will be prompted.
+python xmpp_client.py bob
+python xmpp_client.py alice
 
 This project includes a DH implementation by Elizabeth Myers, see DH.py for more information.
 The main files are based on the twisted library xmpp_client.py example.
